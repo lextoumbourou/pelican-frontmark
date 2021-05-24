@@ -9,6 +9,8 @@ try:
 except ImportError:  # pragma: no cover
     commonmark = False
 
+from markdown import Markdown
+
 try:
     import yaml
 except ImportError:  # pragma: no cover
@@ -126,12 +128,14 @@ class FrontmarkReader(BaseReader):
 
     def read(self, source_path):
         self._source_path = source_path
+        self._md = Markdown(**self.settings['MARKDOWN'])
 
         with pelican_open(source_path) as text:
             metadata, content = self._parse(text)
 
-        content = self._render(content)
-        return content.strip(), self._parse_metadata(metadata)
+        content = self._md.convert(content)
+
+        return content, self._parse_metadata(metadata)
 
     def _parse(self, text):
         '''
